@@ -29,7 +29,7 @@ public class Cracker {
 	
 	private List<String> dict;
 	private List<String> hashedDict;
-	private List<String> hashedPasswords;
+	private Map<Integer, String> hashedPasswords;
 	
 	private int passwordCount = 0;
 	private int matchCount = 0;
@@ -38,37 +38,36 @@ public class Cracker {
 	
 	public Cracker(String dictPath, String passPath) throws Exception {	
 
-		//this.loadDictionary(dictPath);
-		//this.loadPasswords(passPath);
 		System.out.println("Loading dictionary...");
-		this.dict = readFromFile(dictPath);
+		long start = System.nanoTime();
+		dict = new ArrayList<String>();	
+		BufferedReader br = new BufferedReader(new FileReader(dictPath));
+		String line;
+		
+		while ((line = br.readLine()) != null) {
+			dict.add(line);
+		}
+		
+		br.close();
+		long end = System.nanoTime();	
+		System.out.printf("Completed in %.1f seconds", (end - start) / 1e9);	
+		
 		System.out.println("\nLoading passwords...");
-		this.hashedPasswords = readFromFile(passPath);
-			
+		start = System.nanoTime();	
+		hashedPasswords = new HashMap<Integer, String>();
+		br = new BufferedReader(new FileReader(passPath));
+		
+		while ((line = br.readLine()) != null) {
+			hashedPasswords.put(Integer.parseInt(line.substring(4, 5)),line.substring(line.indexOf(":")+1));
+		}
+		
+		br.close();
+		end = System.nanoTime();
+		System.out.printf("Completed in %.1f seconds", (end - start) / 1e9);		
+				
 		// loaded both files, proceed with checking	
 		this.hashDictionary();
 		this.attack();
-	}
-	
-	private ArrayList<String> readFromFile(String filename) throws Exception {
-		long start = System.nanoTime();
-		
-		ArrayList<String> lines = new ArrayList<String>();
-		
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		
-		String line;
-		while ((line = br.readLine()) != null) {
-			lines.add(line);
-		}
-		
-		long end = System.nanoTime();
-		
-		br.close();
-		
-		System.out.printf("Completed in %.1f seconds", (end - start) / 1e9);
-		
-		return lines;
 	}
 	
 /*	private void loadDictionary(String dictPath) throws Exception {
@@ -114,25 +113,36 @@ public class Cracker {
 		System.out.printf("Loaded passwords in %.1f seconds", (end - start) / 1e9);
 	}*/
 	
-	private void hashDictionary() throws Exception {
-		// precomputes hashed dictionary
-		
+	private void hashDictionary() throws Exception {		
 		System.out.println("\nHashing dictionary...");
 		long start = System.nanoTime();
 		
 		// plaintext dict contents should first be hashed with SHA-256
 		//hashedDict = new HashSet<String>();
 		//hashedDict = new HashMap<String, Integer>();
+		
 		hashedDict = new ArrayList<String>();
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		
-		for (int i = 0; i < dict.size(); i++) {
+		// ~6 sec faster than for loop using rockyou dict
+		dict.parallelStream()
+			.forEachOrdered(word -> {
+				try {
+					byte[] digest = md.digest(word.getBytes("UTF-8"));
+					String hex = DatatypeConverter.printHexBinary(digest);
+					hashedDict.add(hex.toLowerCase());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+		
+/*		for (int i = 0; i < dict.size(); i++) {
 			byte[] digest = md.digest(dict.get(i).getBytes("UTF-8"));
 			
 			// convert bytes to string
 			String hex = DatatypeConverter.printHexBinary(digest);
 			hashedDict.add(hex.toLowerCase());
-		}
+		}*/
 		
 		long end = System.nanoTime();
 		
@@ -242,55 +252,62 @@ public class Cracker {
 	    				outputWriter.write("user" + hashedPasswords.get(hashedDict.get(index))+1 + ":" + dict.get(index));
 	    				outputWriter.newLine();
 	    				outputWriter.flush();
-	    			}
-	    			catch (Exception e) {
+	    			} catch (Exception e) {
 	    				e.printStackTrace();
 	    			}
 	    		}
 	        });
 	    }*/
 		
-		for (int i = 0; i < hashedPasswords.size(); i++) {
+/*		for (int i = 0; i < hashedPasswords.size(); i++) {
 			final int index = i;
 			executor.execute(() -> {
 				if (hashedDict.contains(hashedPasswords.get(index))) {
 				//if (hashedDict.containsKey(hashedPasswords.get(index))) {
 					this.matchCount++;
-					
 					synchronized (lock) {
 						try {
-			    				outputWriter.write("user" + (index+1) + ":" + dict.get(hashedDict.indexOf(hashedPasswords.get(index))));
+			    				outputWriter.write("user" + (index) + ":" + dict.get(hashedDict.indexOf(hashedPasswords.get(index))));
 			    				outputWriter.newLine();
 			    				outputWriter.flush();
 							
-		    			}
-		    			catch (Exception e) {
+		    			} catch (Exception e) {
 		    				e.printStackTrace();
 		    			}
 					}
 				}
 			});
-		}
-	    
-	    // shouldn't get to this stage?
+		}*/    
+/*	    // shouldn't get to this stage?
 	    executor.shutdown();
 	    if (executor.isTerminated()) {
 			outputWriter.close();
 	    	//outStream.close();
-	    }
-	   
+	    }*/
+		
+		hashedPasswords.entrySet()
+					   .parallelStream()
+					   .forEach(password -> {
+						   if (hashedDict.contains(password)) {
+							   matchCount++;
+							   synchronized (lock) {
+								   try {
+									   outputWriter.write("user" + password.getKey() + ":" + dict.get(hashedDict.indexOf(password)));
+									   outputWriter.newLine();
+									   outputWriter.flush();
+								   } catch (Exception e) {
+									   e.printStackTrace();
+								   }
+							   }
+						   }
+					   });
+		outputWriter.close();
 		
 		
 		
 		
-		
-		
-		
-		
-		
-	    
 		long end = System.nanoTime();		
-		System.out.printf("Completed bruteforce in %.1f seconds\n", (end - start) / 1e9);
+		System.out.printf("Completed attack in %.1f seconds\n", (end - start) / 1e9);
 /*		
 		if (this.matchCount < this.passwordCount) {
 			this.transform();
