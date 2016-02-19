@@ -9,8 +9,8 @@ public class Driver {
 		// dictSmall.txt // dictionary.txt
 		System.out.println("Enter the file path to the dictionary list: ");
 		//String dictPath = scanner.nextLine();
-		//String dictPath = "10mill.txt";
-		String dictPath = "rockyou.txt";
+		String dictPath = "10mill.txt";
+		//String dictPath = "rockyou.txt";
 		
 		// hashes.txt // password.txt
 		System.out.println("Enter the file path to the hashed password list: ");

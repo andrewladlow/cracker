@@ -1,4 +1,6 @@
-package cracker;
+/*package cracker;
+
+import java.util.HashMap;
 
 public class PasswordChecker implements Runnable {
 	public void run() {
@@ -21,3 +23,4 @@ public class PasswordChecker implements Runnable {
 	}
 
 }
+*/
