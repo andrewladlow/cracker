@@ -13,18 +13,18 @@ import java.util.concurrent.BlockingQueue;
 
 import javax.xml.bind.DatatypeConverter;
 
-public class Producer implements Runnable {
+public class Producer2 implements Runnable {
 	
 	private BlockingQueue<HashMap> stack;
 	private List<String> dictionary;
 	private List<String> tmpDictionary; 
-	private int flag;
+	private int cycle;
 	
-	public Producer(BlockingQueue<HashMap> stack, List<String> dict, int flag) {
+	public Producer2(BlockingQueue<HashMap> stack, String dictPath, List<String> dict) {
 		this.stack = stack;
 		//this.dictionary = new ArrayList<String>();
 		this.dictionary = dict;
-		this.flag = flag;
+		this.cycle = 0;
 		
 /*		try (BufferedReader reader = new BufferedReader(new FileReader(dictPath))) {
 			String line;			
@@ -45,49 +45,41 @@ public class Producer implements Runnable {
 		} 
 		
 		byte[] digest = null;
-			//System.out.println("Cycle: " + cycle);
+		while (true) {
+			System.out.println("Cycle: " + cycle);
 			
 			// reset the dictionary contents on each cycle to revert permutations
 			tmpDictionary = dictionary;
 			
 			for (String word : tmpDictionary) {
-				System.out.println(flag);
-				switch(flag) {
-				case 0:
-				case 1:
-					word = setCapital(word);
-				default:
-				}
-				
+				// add 0-99 to end of word				
+				//if (cycle >= 0 && cycle < 100) {
+					word = word.replaceAll("$", Integer.toString(cycle));
+				// set first character to capital
+				/*} else if (cycle == 100) {
+					word = word.substring(0,1).toUpperCase() + word.substring(1);
+				// combination of both 
+				} else if (cycle >= 100 && cycle < 201) {
+					word = word.substring(0,1).toUpperCase() + word.substring(1);
+					word = word.replaceAll("$", Integer.toString(cycle-101));
+				// 
+				} else if (cycle == 201) {
+					//System.exit(0);
+				}*/
 				try {
-					System.out.println(word);
+					//System.out.println(word);
 					digest = msgDigest.digest(word.getBytes("UTF-8"));
 					String hex = DatatypeConverter.printHexBinary(digest);
 					HashMap<String, String> map = new HashMap<String, String>();
 					map.put(hex.toLowerCase(), word);
 					stack.put(map);
-					//System.out.println("Prod1");
+					//System.out.println("Prod2");
 				} catch (UnsupportedEncodingException | InterruptedException e) {
 					e.printStackTrace();
 				}		
 			}
 			
+			cycle++;
+		}		
 	}
-	
-	private String appendDigits(String word, int digit) {
-		return word.replaceAll("$", Integer.toString(digit));
-	}
-	
-	private String setCapital(String word) {
-		return word.substring(0,1).toUpperCase() + word.substring(1);
-	}
-	
-	private void hashWord(String word) {
-		digest = msgDigest.digest(word.getBytes("UTF-8"));
-		String hex = DatatypeConverter.printHexBinary(digest);
-		HashMap<String, String> map = new HashMap<String, String>();
-		map.put(hex.toLowerCase(), word);
-		stack.put(map);
-	}
-	
 }

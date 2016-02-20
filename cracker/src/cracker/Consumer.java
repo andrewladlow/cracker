@@ -58,6 +58,7 @@ public class Consumer implements Runnable {
 					writer.write(passwords.get(entry.getKey()) + entry.getValue());
 					writer.newLine();
 					writer.flush();
+					passwords.remove(entry.getKey());
 					
 				}				
 			} catch (InterruptedException | IOException e) {

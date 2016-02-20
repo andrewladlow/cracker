@@ -1,32 +1,53 @@
 package cracker;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Driver2 {
+	private static List<String> dictionary;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String passPath = "password.txt";
-		String dictPath = "rockyou.txt";
+		String dictPath = "123.txt";
+		
+		dictionary = new ArrayList<String>();
+		
+		try (BufferedReader reader = new BufferedReader(new FileReader(dictPath))) {
+			String line;			
+			while ((line = reader.readLine()) != null) {
+				dictionary.add(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		
 		// queue of hashed passwords added to by producer, taken by consumer
-		BlockingQueue<HashMap> stack = new ArrayBlockingQueue<HashMap>(100);
+		BlockingQueue<HashMap> stack = new ArrayBlockingQueue<HashMap>(1000);
 		
 		// checks given hashed password against hashes stored in password text file
 		Consumer consumer = new Consumer(stack, passPath);
-		
-		// hashes passwords from those stored in dictionary text file
-		Producer producer = new Producer(stack, dictPath);
-		
 		Thread consumerThread = new Thread(consumer);
-		Thread producerThread = new Thread(producer);
-		
 		consumerThread.start();
-		producerThread.start();
+		
+		
+        for (int i = 0; i < 2; i++) {
+            Runnable producer = new Producer(stack, dictionary, i);
+        	executor.execute(producer);
+        }
+
 	}
-	
 	
 }
