@@ -41,10 +41,21 @@ public class Producer implements Runnable {
 				word = setCapital(word);
 				hashWord(msgDigest, word);
 			}
-			
-		////////////here
-		// 0-99 added to end
+		// replace vowels with digits
 		} else if (flag == 2) {
+			for (String word : dictionary) { 
+				word = lettersToDigits(word);
+				hashWord(msgDigest, word);
+			}
+		// replace vowels with digits + first letter capital
+		} else if (flag == 3) {
+			for (String word : dictionary) {
+				word = lettersToDigits(word);
+				word = setCapital(word);
+				hashWord(msgDigest, word);
+			}
+		// 0-99 added to end
+		} else if (flag == 4) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					word = appendDigits(word, i);
@@ -52,7 +63,7 @@ public class Producer implements Runnable {
 				}						
 			}
 		// first letter capital and 0-99 added to end
-		} else if (flag == 3) {
+		} else if (flag == 5) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					word = setCapital(word);
@@ -60,16 +71,26 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, word);
 				}						
 			}
+		// replace vowels with digits + first letter capital + 0-99 added to end
+		} else if (flag == 6) {
+			for (int i = 0; i <+ 99; i++) {
+				for (String word : dictionary) {
+					word = lettersToDigits(word);
+					word = setCapital(word);
+					word = appendDigits(word, i);
+					hashWord(msgDigest, word);
+				}
+			}
 		// each word joined with every other word
-		} else if (flag == 4) {
+		} else if (flag == 7) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
 					hashWord(msgDigest, newWord);
 				}
 			}
-		// each word joined with every other word, first letter capital
-		} else if (flag == 5) {
+		// first letter capital + each word joined with every other word
+		} else if (flag == 8) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
@@ -78,12 +99,13 @@ public class Producer implements Runnable {
 				}
 			}
 		// combination of all above
-		} else if (flag == 6) {
+		} else if (flag == 9) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					for (String otherWord : dictionary) {
 						String newWord = concat(word, otherWord);
 						newWord = setCapital(newWord);
+						newWord = lettersToDigits(newWord);
 						newWord = appendDigits(newWord, i);
 						hashWord(msgDigest, newWord);
 					}
@@ -102,7 +124,7 @@ public class Producer implements Runnable {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
 	
-	private String LettersToDigits(String word) {
+	private String lettersToDigits(String word) {
 		word.replaceAll("a|A", "4");
 		word.replaceAll("e|E", "3");
 		word.replaceAll("i|I", "1");
