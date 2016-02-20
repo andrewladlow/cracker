@@ -5,22 +5,21 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import javax.xml.bind.DatatypeConverter;
 
 public class Producer implements Runnable {
 	
-	private BlockingQueue<HashMap> stack;
+	private BlockingQueue<Map<String, String>> stack;
 	private List<String> dictionary;
-	private List<String> tmpDictionary; 
 	private int flag;
 	
-	public Producer(BlockingQueue<HashMap> stack, List<String> dict, int flag) {
+	public Producer(BlockingQueue<Map<String, String>> stack, List<String> dictionary, int flag) {
 		this.stack = stack;
-		this.dictionary = dict;
-		this.flag = flag;
-		
+		this.dictionary = dictionary;
+		this.flag = flag;	
 	}
 	
 	public void run() {
@@ -31,26 +30,23 @@ public class Producer implements Runnable {
 			e.printStackTrace();
 		} 
 		
-		//System.out.println("Cycle: " + cycle);
-		
-		// reset the dictionary contents on each cycle to revert permutations
-		tmpDictionary = dictionary;
-		
 		// no modification
 		if (flag == 0) {
-			for (String word : tmpDictionary) {
+			for (String word : dictionary) {
 				hashWord(msgDigest, word);
 			}
 		// first letter capital
 		} else if (flag == 1) {
-			for (String word : tmpDictionary) {
+			for (String word : dictionary) {
 				word = setCapital(word);
 				hashWord(msgDigest, word);
 			}
-		// 0 to 99 added to end
+			
+		////////////here
+		// 0-99 added to end
 		} else if (flag == 2) {
 			for (int i = 0; i <= 99; i++) {
-				for (String word : tmpDictionary) {
+				for (String word : dictionary) {
 					word = appendDigits(word, i);
 					hashWord(msgDigest, word);
 				}						
@@ -58,7 +54,7 @@ public class Producer implements Runnable {
 		// first letter capital and 0-99 added to end
 		} else if (flag == 3) {
 			for (int i = 0; i <= 99; i++) {
-				for (String word : tmpDictionary) {
+				for (String word : dictionary) {
 					word = setCapital(word);
 					word = appendDigits(word, i);
 					hashWord(msgDigest, word);
@@ -66,27 +62,36 @@ public class Producer implements Runnable {
 			}
 		// each word joined with every other word
 		} else if (flag == 4) {
-			for (String word : tmpDictionary) {
-				for (String otherWord : tmpDictionary) {
-					word = word + otherWord;
-					hashWord(msgDigest, word);
+			for (String word : dictionary) {
+				for (String otherWord : dictionary) {
+					String newWord = concat(word, otherWord);
+					hashWord(msgDigest, newWord);
 				}
 			}
-		// combination of everything (probably won't complete in 10 mins)
+		// each word joined with every other word, first letter capital
 		} else if (flag == 5) {
+			for (String word : dictionary) {
+				for (String otherWord : dictionary) {
+					String newWord = concat(word, otherWord);
+					newWord = setCapital(newWord);
+					hashWord(msgDigest, newWord);
+				}
+			}
+		// combination of all above
+		} else if (flag == 6) {
 			for (int i = 0; i <= 99; i++) {
-				for (String word : tmpDictionary) {
-					for (String otherWord : tmpDictionary) {
-						word = word + otherWord;
-						word = setCapital(word);
-						word = appendDigits(word, i);
-						hashWord(msgDigest, word);
+				for (String word : dictionary) {
+					for (String otherWord : dictionary) {
+						String newWord = concat(word, otherWord);
+						newWord = setCapital(newWord);
+						newWord = appendDigits(newWord, i);
+						hashWord(msgDigest, newWord);
 					}
 				}
 			}
 		}
 		
-		System.out.println("Thread " + flag + " stopped");
+		System.out.println("Producer " + flag + " stopped");
 	}
 	
 	private String appendDigits(String word, int digit) {
@@ -97,16 +102,28 @@ public class Producer implements Runnable {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
 	
+	private String LettersToDigits(String word) {
+		word.replaceAll("a|A", "4");
+		word.replaceAll("e|E", "3");
+		word.replaceAll("i|I", "1");
+		word.replaceAll("o|O", "0");	
+		return word;
+	}
+	
+	private String concat(String word, String otherWord) {
+		return word + otherWord;
+	}
+	
 	private void hashWord(MessageDigest msgDigest, String word) {
 		try{ 
 			byte[] digest = msgDigest.digest(word.getBytes("UTF-8"));
 			String hex = DatatypeConverter.printHexBinary(digest);
-			HashMap<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new HashMap<String, String>();
 			map.put(hex.toLowerCase(), word);
+			// blocks and waits if queue is full
 			stack.put(map);
 		} catch (UnsupportedEncodingException | InterruptedException e) {
 			e.printStackTrace();
 		}	
-	}
-	
+	}	
 }

@@ -12,25 +12,25 @@ import java.util.concurrent.BlockingQueue;
 
 public class Consumer implements Runnable {
 	
-	private BlockingQueue<HashMap> stack;
+	private BlockingQueue<Map<String, String>> stack;
 	private Map<String, String> passwords;
-	private int passwordsCount;
+	private int passwordCount;
 	
-	public Consumer(BlockingQueue<HashMap> stack, String passPath) {
+	public Consumer(BlockingQueue<Map<String, String>> stack, String passPath) {
 		this.stack = stack;
 		this.passwords = new HashMap<String, String>();
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(passPath))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
+				// passwords added to hashmap in pass : user format
 				String password = line.substring(line.indexOf(":")+1);
 				passwords.put(password, line.substring(0, line.indexOf(":")+1));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		
-		passwordsCount = passwords.size();
+		}		
+		passwordCount = passwords.size();
 	}
 	
 	public void run() {
@@ -48,18 +48,18 @@ public class Consumer implements Runnable {
 		
 		int matchCount = 0;
 		while (true) {
-			try {				
+			try {
+				// block until queue has content from producers
 				Map<String, String> map = stack.take();
 				Map.Entry<String, String> entry = map.entrySet().iterator().next();
 				
 				if (passwords.containsKey(entry.getKey())) {
 					matchCount++;
-					System.out.println("Passwords matched: " + matchCount + " / " + passwordsCount);
+					System.out.println("Passwords matched: " + matchCount + " / " + passwordCount);
 					writer.write(passwords.get(entry.getKey()) + entry.getValue());
 					writer.newLine();
 					writer.flush();
-					passwords.remove(entry.getKey());
-					
+					passwords.remove(entry.getKey());				
 				}				
 			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
