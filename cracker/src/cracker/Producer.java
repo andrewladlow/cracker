@@ -85,6 +85,8 @@ public class Producer implements Runnable {
 				}
 			}
 		}
+		
+		System.out.println("Thread " + flag + " stopped");
 	}
 	
 	private String appendDigits(String word, int digit) {
@@ -94,7 +96,6 @@ public class Producer implements Runnable {
 	private String setCapital(String word) {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
-	
 	
 	private void hashWord(MessageDigest msgDigest, String word) {
 		try{ 

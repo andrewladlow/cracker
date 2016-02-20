@@ -37,32 +37,20 @@ public class Driver2 {
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		
 		// queue of hashed passwords added to by producer, taken by consumer
-		BlockingQueue<HashMap> stack = new ArrayBlockingQueue<HashMap>(1000);
+		BlockingQueue<HashMap> stack = new ArrayBlockingQueue<HashMap>(20000);
 		
 		// checks given hashed password against hashes stored in password text file
-		Consumer consumer = new Consumer(stack, passPath);
+/*		Consumer consumer = new Consumer(stack, passPath);
 		Thread consumerThread = new Thread(consumer);
-		consumerThread.start();
+		consumerThread.start();*/
 		
-/*		Producer p1 = new Producer(stack, dictionary, 0);
-		Producer p2 = new Producer(stack, dictionary, 1);
-		Producer p3 = new Producer(stack, dictionary, 2);
-		Producer p4 = new Producer(stack, dictionary, 3);
-		
-		Thread pt1 = new Thread(p1);
-		Thread pt2 = new Thread(p2);
-		Thread pt3 = new Thread(p3);
-		Thread pt4 = new Thread(p4);
-		
-		pt1.start();
-		pt2.start();
-		pt3.start();
-		pt4.start();
-*/
+        Runnable consumer = new Consumer(stack, passPath);
+    	executor.execute(consumer);
 		
         for (int i = 0; i <= 5; i++) {
             Runnable producer = new Producer(stack, dictionary, i);
         	executor.execute(producer);
+        	System.out.println("Thread " + i + " started");
         }
 
 	}
