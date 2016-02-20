@@ -33,6 +33,7 @@ public class Consumer implements Runnable {
 		passwordCount = passwords.size();
 	}
 	
+	@SuppressWarnings("resource")
 	public void run() {
 		File output = new File("output.txt");
 		if (output.exists()) {

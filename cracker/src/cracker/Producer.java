@@ -19,6 +19,7 @@ public class Producer implements Runnable {
 	public Producer(BlockingQueue<Map<String, String>> stack, List<String> dictionary, int flag) {
 		this.stack = stack;
 		this.dictionary = dictionary;
+		// flag indicates which permutations to perform
 		this.flag = flag;	
 	}
 	
@@ -62,7 +63,7 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, word);
 				}						
 			}
-		// first letter capital and 0-99 added to end
+		// first letter capital + 0-99 added to end
 		} else if (flag == 5) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
@@ -71,12 +72,12 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, word);
 				}						
 			}
-		// replace vowels with digits + first letter capital + 0-99 added to end
+		// first letter capital + replace vowels with digits + 0-99 added to end
 		} else if (flag == 6) {
-			for (int i = 0; i <+ 99; i++) {
+			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
-					word = lettersToDigits(word);
 					word = setCapital(word);
+					word = lettersToDigits(word);
 					word = appendDigits(word, i);
 					hashWord(msgDigest, word);
 				}
@@ -89,7 +90,7 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, newWord);
 				}
 			}
-		// first letter capital + each word joined with every other word
+		// each word joined with every other word + first letter capital
 		} else if (flag == 8) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
@@ -98,14 +99,13 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, newWord);
 				}
 			}
-		// combination of all above
+		// each word joined with every other word + first letter capital + 0-99 added to end
 		} else if (flag == 9) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					for (String otherWord : dictionary) {
 						String newWord = concat(word, otherWord);
 						newWord = setCapital(newWord);
-						newWord = lettersToDigits(newWord);
 						newWord = appendDigits(newWord, i);
 						hashWord(msgDigest, newWord);
 					}
@@ -125,10 +125,10 @@ public class Producer implements Runnable {
 	}
 	
 	private String lettersToDigits(String word) {
-		word.replaceAll("a|A", "4");
-		word.replaceAll("e|E", "3");
-		word.replaceAll("i|I", "1");
-		word.replaceAll("o|O", "0");	
+		word = word.replaceAll("a|A", "4");
+		word = word.replaceAll("e|E", "3");
+		word = word.replaceAll("i|I", "1");
+		word = word.replaceAll("o|O", "0");	
 		return word;
 	}
 	

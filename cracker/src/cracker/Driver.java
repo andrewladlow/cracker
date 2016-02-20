@@ -15,7 +15,7 @@ public class Driver {
 	
 	public static void main(String[] args) throws Exception {
 		String passPath = "password.txt";
-		String dictPath = "dictionary/dictionary.txt";
+		String dictPath = "dictionary.txt";
 		
 		System.out.println("Loading dictionary");
 		
@@ -37,13 +37,14 @@ public class Driver {
 		// queue of hashmaps (in format hashedWord : word) added to by producer, taken by consumer
 		BlockingQueue<Map<String, String>> stack = new ArrayBlockingQueue<Map<String, String>>(25000);
 		
-		// checks given hashed password against hashes stored in password text file		
+		// checks given hashed word from producers against hashes stored in password text file		
         Runnable consumer = new Consumer(stack, passPath);
     	executor.execute(consumer);
     	System.out.println("Consumer started");
 		
+    	// each thread has increasing computation time based on i
         for (int i = 0; i <= 9; i++) {
-        	// each thread has increasing computation time based on i
+        	// hashes words from those stored in dictionary text file, sends to consumer to check
             Runnable producer = new Producer(stack, dictionary, i);
         	executor.execute(producer);
         	System.out.println("Producer " + i + " started");
