@@ -42,7 +42,7 @@ public class Driver {
     	executor.execute(consumer);
     	System.out.println("Consumer started");
 		
-        for (int i = 0; i <= 7; i++) {
+        for (int i = 0; i <= 9; i++) {
         	// each thread has increasing computation time based on i
             Runnable producer = new Producer(stack, dictionary, i);
         	executor.execute(producer);
