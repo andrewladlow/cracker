@@ -1,12 +1,8 @@
 package cracker;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -22,18 +18,9 @@ public class Producer implements Runnable {
 	
 	public Producer(BlockingQueue<HashMap> stack, List<String> dict, int flag) {
 		this.stack = stack;
-		//this.dictionary = new ArrayList<String>();
 		this.dictionary = dict;
 		this.flag = flag;
 		
-/*		try (BufferedReader reader = new BufferedReader(new FileReader(dictPath))) {
-			String line;			
-			while ((line = reader.readLine()) != null) {
-				dictionary.add(line);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
 	}
 	
 	public void run() {
@@ -44,34 +31,60 @@ public class Producer implements Runnable {
 			e.printStackTrace();
 		} 
 		
-		byte[] digest = null;
-			//System.out.println("Cycle: " + cycle);
-			
-			// reset the dictionary contents on each cycle to revert permutations
-			tmpDictionary = dictionary;
-			
+		//System.out.println("Cycle: " + cycle);
+		
+		// reset the dictionary contents on each cycle to revert permutations
+		tmpDictionary = dictionary;
+		
+		// no modification
+		if (flag == 0) {
 			for (String word : tmpDictionary) {
-				System.out.println(flag);
-				switch(flag) {
-				case 0:
-				case 1:
-					word = setCapital(word);
-				default:
-				}
-				
-				try {
-					System.out.println(word);
-					digest = msgDigest.digest(word.getBytes("UTF-8"));
-					String hex = DatatypeConverter.printHexBinary(digest);
-					HashMap<String, String> map = new HashMap<String, String>();
-					map.put(hex.toLowerCase(), word);
-					stack.put(map);
-					//System.out.println("Prod1");
-				} catch (UnsupportedEncodingException | InterruptedException e) {
-					e.printStackTrace();
-				}		
+				hashWord(msgDigest, word);
 			}
-			
+		// first letter capital
+		} else if (flag == 1) {
+			for (String word : tmpDictionary) {
+				word = setCapital(word);
+				hashWord(msgDigest, word);
+			}
+		// 0 to 99 added to end
+		} else if (flag == 2) {
+			for (int i = 0; i <= 99; i++) {
+				for (String word : tmpDictionary) {
+					word = appendDigits(word, i);
+					hashWord(msgDigest, word);
+				}						
+			}
+		// first letter capital and 0-99 added to end
+		} else if (flag == 3) {
+			for (int i = 0; i <= 99; i++) {
+				for (String word : tmpDictionary) {
+					word = setCapital(word);
+					word = appendDigits(word, i);
+					hashWord(msgDigest, word);
+				}						
+			}
+		// each word joined with every other word
+		} else if (flag == 4) {
+			for (String word : tmpDictionary) {
+				for (String otherWord : tmpDictionary) {
+					word = word + otherWord;
+					hashWord(msgDigest, word);
+				}
+			}
+		// combination of everything (probably won't complete in 10 mins)
+		} else if (flag == 5) {
+			for (int i = 0; i <= 99; i++) {
+				for (String word : tmpDictionary) {
+					for (String otherWord : tmpDictionary) {
+						word = word + otherWord;
+						word = setCapital(word);
+						word = appendDigits(word, i);
+						hashWord(msgDigest, word);
+					}
+				}
+			}
+		}
 	}
 	
 	private String appendDigits(String word, int digit) {
@@ -82,12 +95,17 @@ public class Producer implements Runnable {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
 	
-	private void hashWord(String word) {
-		digest = msgDigest.digest(word.getBytes("UTF-8"));
-		String hex = DatatypeConverter.printHexBinary(digest);
-		HashMap<String, String> map = new HashMap<String, String>();
-		map.put(hex.toLowerCase(), word);
-		stack.put(map);
+	
+	private void hashWord(MessageDigest msgDigest, String word) {
+		try{ 
+			byte[] digest = msgDigest.digest(word.getBytes("UTF-8"));
+			String hex = DatatypeConverter.printHexBinary(digest);
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put(hex.toLowerCase(), word);
+			stack.put(map);
+		} catch (UnsupportedEncodingException | InterruptedException e) {
+			e.printStackTrace();
+		}	
 	}
 	
 }

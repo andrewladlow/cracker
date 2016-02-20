@@ -19,7 +19,7 @@ public class Driver2 {
 	
 	public static void main(String[] args) throws Exception {
 		String passPath = "password.txt";
-		String dictPath = "123.txt";
+		String dictPath = "rockyou.txt";
 		
 		dictionary = new ArrayList<String>();
 		
@@ -31,6 +31,8 @@ public class Driver2 {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("Dictionary loaded");
 	
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		
@@ -42,8 +44,23 @@ public class Driver2 {
 		Thread consumerThread = new Thread(consumer);
 		consumerThread.start();
 		
+/*		Producer p1 = new Producer(stack, dictionary, 0);
+		Producer p2 = new Producer(stack, dictionary, 1);
+		Producer p3 = new Producer(stack, dictionary, 2);
+		Producer p4 = new Producer(stack, dictionary, 3);
 		
-        for (int i = 0; i < 2; i++) {
+		Thread pt1 = new Thread(p1);
+		Thread pt2 = new Thread(p2);
+		Thread pt3 = new Thread(p3);
+		Thread pt4 = new Thread(p4);
+		
+		pt1.start();
+		pt2.start();
+		pt3.start();
+		pt4.start();
+*/
+		
+        for (int i = 0; i <= 5; i++) {
             Runnable producer = new Producer(stack, dictionary, i);
         	executor.execute(producer);
         }
