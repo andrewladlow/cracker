@@ -12,12 +12,12 @@ import javax.xml.bind.DatatypeConverter;
 
 public class Producer implements Runnable {
 	
-	private BlockingQueue<Map<String, String>> stack;
+	private BlockingQueue<Map<String, String>> queue;
 	private List<String> dictionary;
 	private int flag;
 	
-	public Producer(BlockingQueue<Map<String, String>> stack, List<String> dictionary, int flag) {
-		this.stack = stack;
+	public Producer(BlockingQueue<Map<String, String>> queue, List<String> dictionary, int flag) {
+		this.queue = queue;
 		this.dictionary = dictionary;
 		// flag indicates which permutations to perform
 		this.flag = flag;	
@@ -36,27 +36,49 @@ public class Producer implements Runnable {
 			for (String word : dictionary) {
 				hashWord(msgDigest, word);
 			}
-		// first letter capital
+		// reverse word
 		} else if (flag == 1) {
+			for (String word : dictionary) {
+				String newWord = reverse(word);
+				hashWord(msgDigest, newWord);
+			}
+		// first letter capital
+		} else if (flag == 2) {
 			for (String word : dictionary) {
 				word = setCapital(word);
 				hashWord(msgDigest, word);
 			}
 		// replace vowels with digits
-		} else if (flag == 2) {
+		} else if (flag == 3) {
 			for (String word : dictionary) { 
 				word = lettersToDigits(word);
 				hashWord(msgDigest, word);
 			}
-		// replace vowels with digits + first letter capital
-		} else if (flag == 3) {
+		// first letter capital + replace vowels with digits
+		} else if (flag == 4) {
 			for (String word : dictionary) {
-				word = lettersToDigits(word);
 				word = setCapital(word);
+				word = lettersToDigits(word);
 				hashWord(msgDigest, word);
 			}
+		// years added to end
+		} else if (flag == 5) {
+			for (int i = 1950; i <= 2016; i++) {
+				for (String word : dictionary) {
+					word = appendDigits(word, i);
+					hashWord(msgDigest, word);
+				}						
+			}
+		// 0-99 added to beginning
+		} else if (flag == 6) {
+			for (int i = 0; i <= 99; i++) {
+				for (String word : dictionary) {
+					word = prependDigits(word, i);
+					hashWord(msgDigest, word);
+				}						
+			}
 		// 0-99 added to end
-		} else if (flag == 4) {
+		} else if (flag == 7) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					word = appendDigits(word, i);
@@ -64,7 +86,7 @@ public class Producer implements Runnable {
 				}						
 			}
 		// first letter capital + 0-99 added to end
-		} else if (flag == 5) {
+		} else if (flag == 8) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					word = setCapital(word);
@@ -73,7 +95,7 @@ public class Producer implements Runnable {
 				}						
 			}
 		// first letter capital + replace vowels with digits + 0-99 added to end
-		} else if (flag == 6) {
+		} else if (flag == 9) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					word = setCapital(word);
@@ -83,7 +105,7 @@ public class Producer implements Runnable {
 				}
 			}
 		// each word joined with every other word
-		} else if (flag == 7) {
+		} else if (flag == 10) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
@@ -91,7 +113,7 @@ public class Producer implements Runnable {
 				}
 			}
 		// each word joined with every other word + first letter capital
-		} else if (flag == 8) {
+		} else if (flag == 11) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
@@ -99,13 +121,12 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, newWord);
 				}
 			}
-		// each word joined with every other word + first letter capital + 0-99 added to end
-		} else if (flag == 9) {
+		// each word joined with every other word + 0-99 added to end
+		} else if (flag == 12) {
 			for (int i = 0; i <= 99; i++) {
 				for (String word : dictionary) {
 					for (String otherWord : dictionary) {
 						String newWord = concat(word, otherWord);
-						newWord = setCapital(newWord);
 						newWord = appendDigits(newWord, i);
 						hashWord(msgDigest, newWord);
 					}
@@ -120,6 +141,10 @@ public class Producer implements Runnable {
 		return word.replaceAll("$", Integer.toString(digit));
 	}
 	
+	private String prependDigits(String word, int digit) {
+		return word.replaceAll("^", Integer.toString(digit));
+	}
+	
 	private String setCapital(String word) {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
@@ -132,6 +157,10 @@ public class Producer implements Runnable {
 		return word;
 	}
 	
+	private String reverse(String word) {
+		return new StringBuilder(word).reverse().toString();
+	}
+	
 	private String concat(String word, String otherWord) {
 		return word + otherWord;
 	}
@@ -142,8 +171,8 @@ public class Producer implements Runnable {
 			String hex = DatatypeConverter.printHexBinary(digest);
 			Map<String, String> map = new HashMap<String, String>();
 			map.put(hex.toLowerCase(), word);
-			// blocks and waits if queue is full
-			stack.put(map);
+			// waits if queue is full
+			queue.put(map);
 		} catch (UnsupportedEncodingException | InterruptedException e) {
 			e.printStackTrace();
 		}	

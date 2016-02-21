@@ -12,25 +12,23 @@ import java.util.concurrent.BlockingQueue;
 
 public class Consumer implements Runnable {
 	
-	private BlockingQueue<Map<String, String>> stack;
+	private BlockingQueue<Map<String, String>> queue;
 	private Map<String, String> passwords;
-	private int passwordCount;
 	
-	public Consumer(BlockingQueue<Map<String, String>> stack, String passPath) {
-		this.stack = stack;
+	public Consumer(BlockingQueue<Map<String, String>> queue, String passPath) {
+		this.queue = queue;
 		this.passwords = new HashMap<String, String>();
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(passPath))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				// passwords added to hashmap in pass : user format
 				String password = line.substring(line.indexOf(":")+1);
-				passwords.put(password, line.substring(0, line.indexOf(":")+1));
+				String user = line.substring(0, line.indexOf(":")+1);
+				passwords.put(password, user);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
-		passwordCount = passwords.size();
 	}
 	
 	@SuppressWarnings("resource")
@@ -48,15 +46,17 @@ public class Consumer implements Runnable {
 		}
 		
 		int matchCount = 0;
+		int passwordCount = passwords.size();
 		while (true) {
 			try {
-				// block until queue has content from producers
-				Map<String, String> map = stack.take();
+				// wait until queue has content from producers
+				Map<String, String> map = queue.take();
 				Map.Entry<String, String> entry = map.entrySet().iterator().next();
 				
 				if (passwords.containsKey(entry.getKey())) {
 					matchCount++;
 					System.out.println("Passwords matched: " + matchCount + " / " + passwordCount);
+					// retrieves corresponding user from passwords, then plaintext pass from queue hashmap
 					writer.write(passwords.get(entry.getKey()) + entry.getValue());
 					writer.newLine();
 					writer.flush();
