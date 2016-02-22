@@ -21,7 +21,7 @@ public class Driver {
 	
 	public static void main(String[] args) throws Exception {
 		String passPath = "password.txt";
-		String dictPath = "merged.txt";
+		String dictPath = "dictionary.txt";
 		
 		System.out.println("Loading dictionary");
 		
@@ -68,16 +68,16 @@ public class Driver {
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		//ExecutorService executor = Executors.newFixedThreadPool(4);
 		
-		// queue of hashmaps (in format hashedWord : word) added to by producers, taken by consumer
-		BlockingQueue<Map<String, String>> queue = new LinkedBlockingQueue<Map<String, String>>();
+		// queue of items (containing a word and it's hash equivalent) added to by producers, taken by consumer
+		BlockingQueue<Item> queue = new LinkedBlockingQueue<Item>();
 		
 		// checks given hashed word from producers against hashes stored in password text file
         Runnable consumer = new Consumer(queue, passPath);
     	executor.execute(consumer);
     	System.out.println("Consumer started");
 		
-    	// each thread has increasing computation time based on i
-        for (int i = 0; i <= 12; i++) {
+    	// each thread has increasing approximate computation time based on i
+        for (int i = 1; i <= 15; i++) {
         	// hashes words from those stored in dictionary text file, sends to consumer to check
             Runnable producer = new Producer(queue, dictionary, i);
         	executor.execute(producer);

@@ -12,10 +12,10 @@ import java.util.concurrent.BlockingQueue;
 
 public class Consumer implements Runnable {
 	
-	private BlockingQueue<Map<String, String>> queue;
+	private BlockingQueue<Item> queue;
 	private Map<String, String> passwords;
 	
-	public Consumer(BlockingQueue<Map<String, String>> queue, String passPath) {
+	public Consumer(BlockingQueue<Item> queue, String passPath) {
 		this.queue = queue;
 		this.passwords = new HashMap<String, String>();
 		
@@ -50,17 +50,16 @@ public class Consumer implements Runnable {
 		while (true) {
 			try {
 				// wait until queue has content from producers
-				Map<String, String> map = queue.take();
-				Map.Entry<String, String> entry = map.entrySet().iterator().next();
+				Item item = queue.take();
 				
-				if (passwords.containsKey(entry.getKey())) {
+				if (passwords.containsKey(item.getHash())) {
 					matchCount++;
 					System.out.println("Passwords matched: " + matchCount + " / " + passwordCount);
 					// retrieves corresponding user from passwords, then plaintext pass from queue hashmap
-					writer.write(passwords.get(entry.getKey()) + entry.getValue());
+					writer.write(passwords.get(item.getHash()) + item.getPlain());
 					writer.newLine();
 					writer.flush();
-					passwords.remove(entry.getKey());				
+					passwords.remove(item.getHash());				
 				}				
 			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
