@@ -34,88 +34,122 @@ public class Producer implements Runnable {
 			for (String word : dictionary) {
 				hashWord(msgDigest, word);
 			}
-		// whole word lower case
+		// word repeated
 		} else if (flag == 2) {
 			for (String word : dictionary) {
-				word = setAllLowerCase(word);
+				word = word + word;
 				hashWord(msgDigest, word);
 			}
+		// first letter upper case
+		} else if (flag == 3) {
+			for (String word : dictionary) {
+				word = setFirstCapital(word);
+				hashWord(msgDigest, word);
+			}
+
 		// whole word upper case
 		} else if (flag == 4) {
 			for (String word : dictionary) {
 				word = setAllCapital(word);
 				hashWord(msgDigest, word);
 			}
+		// whole word lower case
+		} else if (flag == 5) {
+			for (String word : dictionary) {
+				word = setAllLowerCase(word);
+				hashWord(msgDigest, word);
+			}
 		// reverse word
-		} else if (flag == 3) {
+		} else if (flag == 6) {
 			for (String word : dictionary) {
 				String newWord = reverse(word);
 				hashWord(msgDigest, newWord);
 			}
-		// first letter upper case
-		} else if (flag == 5) {
+		// append '!' 
+		} else if (flag == 7) {
+			for (String word : dictionary) {
+				word = appendSpecial(word);
+				hashWord(msgDigest, word);
+			}
+		// first letter upper case + append '!'
+		} else if (flag == 8) {
 			for (String word : dictionary) {
 				word = setFirstCapital(word);
+				word = appendSpecial(word);
+				hashWord(msgDigest, word);
+			}
+		// replace 'O' and 'o' with '0'
+		} else if (flag == 9) {
+			for (String word : dictionary) { 
+				word = oToZero(word);
+				hashWord(msgDigest, word);
+			}
+		// first letter upper case + replace 'O' and 'o' with '0'
+		} else if (flag == 10) {
+			for (String word : dictionary) { 
+				word = setFirstCapital(word);
+				word = oToZero(word);
 				hashWord(msgDigest, word);
 			}
 		// replace letters with digits
-		} else if (flag == 6) {
+		} else if (flag == 11) {
 			for (String word : dictionary) { 
 				word = lettersToDigits(word);
 				hashWord(msgDigest, word);
 			}
 		// first letter upper case + replace letters with digits
-		} else if (flag == 7) {
+		} else if (flag == 12) {
 			for (String word : dictionary) {
 				word = setFirstCapital(word);
 				word = lettersToDigits(word);
 				hashWord(msgDigest, word);
 			}
-		// years added to end
-		} else if (flag == 8) {
-			for (int i = 1930; i <= 2016; i++) {
-				for (String word : dictionary) {
-					word = appendDigits(word, i);
-					hashWord(msgDigest, word);
-				}						
-			}
-		// 0-99 added to beginning
-		} else if (flag == 9) {
-			for (int i = 0; i <= 99; i++) {
+		// 0-200 added to beginning
+		} else if (flag == 13) {
+			for (int i = 0; i <= 200; i++) {
 				for (String word : dictionary) {
 					word = prependDigits(word, i);
 					hashWord(msgDigest, word);
 				}						
 			}
-		// 0-99 added to end
-		} else if (flag == 10) {
-			for (int i = 0; i <= 99; i++) {
+		// 0-200 added to end
+		} else if (flag == 14) {
+			for (int i = 0; i <= 200; i++) {
 				for (String word : dictionary) {
 					word = appendDigits(word, i);
+					if (word.equals("flapjack44")) {
+						System.out.println("BINGO");
+					}
 					hashWord(msgDigest, word);
 				}						
 			}
-		// first letter upper case + 0-99 added to end
-		} else if (flag == 11) {
-			for (int i = 0; i <= 99; i++) {
+		// first letter upper case + 0-200 added to end
+		} else if (flag == 15) {
+			for (int i = 0; i <= 200; i++) {
 				for (String word : dictionary) {
 					word = setFirstCapital(word);
 					word = appendDigits(word, i);
 					hashWord(msgDigest, word);
 				}						
 			}
-		// first letter upper case + replace letters with digits + 0-99 added to end
-		} else if (flag == 12) {
-			for (int i = 0; i <= 99; i++) {
+		// 1900-2200 added to beginning
+		} else if (flag == 16) {
+			for (int i = 1900; i <= 2200; i++) {
 				for (String word : dictionary) {
-					word = setFirstCapital(word);
-					word = lettersToDigits(word);
+					word = prependDigits(word, i);
+					hashWord(msgDigest, word);
+				}						
+			}
+		// 1900-2200 added to end
+		} else if (flag == 17) {
+			for (int i = 1900; i <= 2200; i++) {
+				for (String word : dictionary) {
 					word = appendDigits(word, i);
 					hashWord(msgDigest, word);
-				}
+				}						
 			}
 		// each word joined with every other word
-		} else if (flag == 13) {
+		} else if (flag == 18) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
@@ -123,7 +157,7 @@ public class Producer implements Runnable {
 				}
 			}
 		// each word joined with every other word + first letter upper case
-		} else if (flag == 14) {
+		} else if (flag == 19) {
 			for (String word : dictionary) {
 				for (String otherWord : dictionary) {
 					String newWord = concat(word, otherWord);
@@ -131,9 +165,9 @@ public class Producer implements Runnable {
 					hashWord(msgDigest, newWord);
 				}
 			}
-		// each word joined with every other word + 0-99 added to end
-		} else if (flag == 15) {
-			for (int i = 0; i <= 99; i++) {
+		// each word joined with every other word + 0-200 added to end
+		} else if (flag == 20) {
+			for (int i = 0; i <= 200; i++) {
 				for (String word : dictionary) {
 					for (String otherWord : dictionary) {
 						String newWord = concat(word, otherWord);
@@ -151,6 +185,10 @@ public class Producer implements Runnable {
 		return word.replaceAll("$", Integer.toString(digit));
 	}
 	
+	private String appendSpecial(String word) {
+		return word.replaceAll("$", "!");
+	}
+	
 	private String prependDigits(String word, int digit) {
 		return word.replaceAll("^", Integer.toString(digit));
 	}
@@ -165,6 +203,11 @@ public class Producer implements Runnable {
 	
 	private String setAllLowerCase(String word) {
 		return word.toLowerCase();
+	}
+	
+	private String oToZero(String word) {
+		word = word.replaceAll("o|O", "0");
+		return word;
 	}
 	
 	private String lettersToDigits(String word) {

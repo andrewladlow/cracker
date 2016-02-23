@@ -1,17 +1,10 @@
 package cracker;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,47 +19,20 @@ public class Driver {
 		System.out.println("Loading dictionary");
 		
 		List<String> dictionary = new ArrayList<String>();
-	//	Set<String> hs = new HashSet<String>();
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(dictPath))) {
 			String line;			
 			while ((line = reader.readLine()) != null) {
 				dictionary.add(line);
-				//hs.add(line);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		System.out.println("Dictionary loaded");
-		
-/*		System.out.println(dictionary.size());
-		System.out.println(hs.size());
-		
-		File output = new File("output.txt");
-		if (output.exists()) {
-			output.delete();
-		}
-		
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new FileWriter("output.txt"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		for (String word : hs) {
-			writer.write(word);
-			writer.newLine();
-			writer.flush();
-		}
-		
-		*/
-		
+		System.out.println("Dictionary loaded");				
 		
 	
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		//ExecutorService executor = Executors.newFixedThreadPool(4);
 		
 		// queue of items (containing a word and it's hash equivalent) added to by producers, taken by consumer
 		BlockingQueue<Item> queue = new LinkedBlockingQueue<Item>();
@@ -77,7 +43,7 @@ public class Driver {
     	System.out.println("Consumer started");
 		
     	// each thread has increasing approximate computation time based on i
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= 20; i++) {
         	// hashes words from those stored in dictionary text file, sends to consumer to check
             Runnable producer = new Producer(queue, dictionary, i);
         	executor.execute(producer);
