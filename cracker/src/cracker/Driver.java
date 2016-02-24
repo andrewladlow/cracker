@@ -20,6 +20,7 @@ public class Driver {
 		
 		List<String> dictionary = new ArrayList<String>();
 		
+		// store dictionary file in memory
 		try (BufferedReader reader = new BufferedReader(new FileReader(dictPath))) {
 			String line;			
 			while ((line = reader.readLine()) != null) {
@@ -38,6 +39,7 @@ public class Driver {
 		BlockingQueue<Item> queue = new LinkedBlockingQueue<Item>();
 		
 		// checks given hashed word from producers against hashes stored in password text file
+		// single consumer serialises writes, avoids concurrent mangling of output file
         Runnable consumer = new Consumer(queue, passPath);
     	executor.execute(consumer);
     	System.out.println("Consumer started");

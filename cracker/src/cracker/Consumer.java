@@ -19,6 +19,7 @@ public class Consumer implements Runnable {
 		this.queue = queue;
 		this.passwords = new HashMap<String, String>();
 		
+		// store password file in memory
 		try (BufferedReader reader = new BufferedReader(new FileReader(passPath))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -55,7 +56,8 @@ public class Consumer implements Runnable {
 				if (passwords.containsKey(item.getHash())) {
 					matchCount++;
 					System.out.println("Passwords matched: " + matchCount + " / " + passwordCount);
-					// retrieves corresponding user from passwords, then plaintext pass from queue hashmap
+					// retrieves corresponding user from passwords using queue item,
+					// then prints associated plain text pass from queue item
 					writer.write(passwords.get(item.getHash()) + item.getPlain());
 					writer.newLine();
 					writer.flush();

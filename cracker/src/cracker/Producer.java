@@ -181,35 +181,43 @@ public class Producer implements Runnable {
 		System.out.println("Producer " + flag + " stopped");
 	}
 	
+	// adds int to end of string
 	private String appendDigits(String word, int digit) {
 		return word.replaceAll("$", Integer.toString(digit));
 	}
 	
+	// adds '!' to end of string
 	private String appendSpecial(String word) {
 		return word.replaceAll("$", "!");
 	}
 	
+	// adds int to start of string
 	private String prependDigits(String word, int digit) {
 		return word.replaceAll("^", Integer.toString(digit));
 	}
 	
+	// first letter of string set to upper case
 	private String setFirstCapital(String word) {
 		return word.substring(0,1).toUpperCase() + word.substring(1);
 	}
 	
+	// whole string set to upper case
 	private String setAllCapital(String word) {
 		return word.toUpperCase();
 	}
 	
+	// whole string set to lower case
 	private String setAllLowerCase(String word) {
 		return word.toLowerCase();
 	}
 	
+	// any 'o' and 'O' characters replaced with '0'
 	private String oToZero(String word) {
 		word = word.replaceAll("o|O", "0");
 		return word;
 	}
 	
+	// any 'a','A', 'e','E', 'i','I', 'o','O', replaced with 4 3 1 0 respectively
 	private String lettersToDigits(String word) {
 		word = word.replaceAll("a|A", "4");
 		word = word.replaceAll("e|E", "3");
@@ -218,10 +226,12 @@ public class Producer implements Runnable {
 		return word;
 	}
 	
+	// string reversed
 	private String reverse(String word) {
 		return new StringBuilder(word).reverse().toString();
 	}
 	
+	// two strings joined together
 	private String concat(String word, String otherWord) {
 		return word + otherWord;
 	}
